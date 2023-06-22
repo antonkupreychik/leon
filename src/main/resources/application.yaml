@@ -1,0 +1,21 @@
+server:
+  port: 8088
+
+wikipedia:
+  link: 'https://en.wikipedia.org/wiki/List_of_country_calling_codes'
+  xPatForTable: '/html/body/div[2]/div/div[3]/main/div[3]/div[3]/div[1]/table[2]/tbody'
+
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/leon
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
