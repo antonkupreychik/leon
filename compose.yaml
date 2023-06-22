@@ -2,6 +2,7 @@ version: '3.7'
 
 services:
   postgres:
+    container_name: postgres
     image: postgres:13.3
     ports:
       - 5432:5432
@@ -11,8 +12,11 @@ services:
       POSTGRES_DB: leon
 
   country-service:
-    image: country-service:latest
+    container_name: country-service
+    image: country-service:1.0.0
+    build:
+      dockerfile: Dockerfile
     ports:
-      - 8081:8081
+      - 8088:8088
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/leon

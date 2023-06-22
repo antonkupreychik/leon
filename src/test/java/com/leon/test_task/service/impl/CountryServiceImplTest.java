@@ -19,7 +19,9 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,14 +39,20 @@ class CountryServiceImplTest {
     @InjectMocks
     CountryServiceImpl countryServiceImpl;
 
-    String pathToCorrectHtml = "src/test/resources/correct-data.html";
-    String pathToIncorrectHtml = "src/test/resources/incorrect-data.html";
+    String PATH_TO_CORRECT_HTML = "src/test/resources/correct-data.html";
+    String PATH_TO_INCORRECT_HTML = "src/test/resources/incorrect-data.html";
+    String UTF_8 = "UTF-8";
+    String PATH = "/html/body/table/tbody";
+    String INVALID_PHONE_NUMBER = "Invalid phone number";
+    String VALID_PHONE_NUMBER = "1 202-456-1111";
+    String VALID_COUNTRY = "USA";
+    String UNKNOWN = "UNKNOWN";
 
     @Test
     void should_init_with_correct_data() throws IOException {
-        File file = new File(pathToCorrectHtml);
-        Document document = Jsoup.parse(file, "UTF-8");
-        Elements elements = document.selectXpath("/html/body/table/tbody");
+        File file = new File(PATH_TO_CORRECT_HTML);
+        Document document = Jsoup.parse(file, UTF_8);
+        Elements elements = document.selectXpath(PATH);
 
         when(properties.getLink()).thenReturn("some link");
         when(properties.getXPatForTable()).thenReturn("some xpath");
@@ -56,9 +64,9 @@ class CountryServiceImplTest {
 
     @Test
     void should_return_exception_because_cannot_parse() throws IOException {
-        File file = new File(pathToIncorrectHtml);
-        Document document = Jsoup.parse(file, "UTF-8");
-        Elements elements = document.selectXpath("/html/body/table/tbody");
+        File file = new File(PATH_TO_INCORRECT_HTML);
+        Document document = Jsoup.parse(file, UTF_8);
+        Elements elements = document.selectXpath(PATH);
 
         when(properties.getLink()).thenReturn("some link");
         when(properties.getXPatForTable()).thenReturn("some xpath");
@@ -66,5 +74,25 @@ class CountryServiceImplTest {
                 .thenReturn(elements);
 
         assertThrows(ParseException.class, () -> countryServiceImpl.init());
+    }
+
+    @Test
+    void should_return_unknown_because_validation_failed() {
+        when(validateService.isValidPhoneNumber(INVALID_PHONE_NUMBER)).thenReturn(false);
+        assertEquals("Validation error", countryServiceImpl.getCountryFromPhone(INVALID_PHONE_NUMBER));
+    }
+
+    @Test
+    void should_return_unknown_because_cache_is_empty() {
+        when(validateService.isValidPhoneNumber(VALID_PHONE_NUMBER)).thenReturn(true);
+        when(cacheService.get(anyString())).thenReturn(UNKNOWN);
+        assertEquals(UNKNOWN, countryServiceImpl.getCountryFromPhone(VALID_PHONE_NUMBER));
+    }
+
+    @Test
+    void should_return_country() {
+        when(validateService.isValidPhoneNumber(VALID_PHONE_NUMBER)).thenReturn(true);
+        when(cacheService.get("1")).thenReturn(VALID_COUNTRY);
+        assertEquals(VALID_COUNTRY, countryServiceImpl.getCountryFromPhone(VALID_PHONE_NUMBER));
     }
 }

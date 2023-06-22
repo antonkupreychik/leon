@@ -60,15 +60,21 @@ public class CountryServiceImpl implements CountryService {
     public String getCountryFromPhone(String phone) {
         if (validateService.isValidPhoneNumber(phone)) {
             String country;
-            for (int i = 0; i < phone.length() + 1; i++) {
+            phone = removeNonDigits(phone);
+            for (int i = 1; i < phone.length() + 1; i++) {
                 String countryCodeCandidate = phone.substring(0, i);
                 country = cacheService.get(countryCodeCandidate);
                 if (!country.equals(UNKNOWN)) {
+                    log.info("Country '{}' found for phone: {}", country, phone);
                     return country;
                 }
             }
+            log.warn("Country not found for phone: {}", phone);
+            return UNKNOWN;
+        } else {
+            log.warn("Phone number is not valid: {}", phone);
+            return "Validation error";
         }
-        return UNKNOWN;
     }
 
     /**
@@ -158,5 +164,15 @@ public class CountryServiceImpl implements CountryService {
      */
     private boolean isHaveFlag(List<Node> columns) {
         return columns.get(0).childNodes().size() == 2;
+    }
+
+    /**
+     * Remove all non-digits from phone number
+     *
+     * @param phone phone number
+     * @return phone number without non-digits
+     */
+    private String removeNonDigits(String phone) {
+        return phone.replaceAll("\\D", "");
     }
 }

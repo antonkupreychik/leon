@@ -21,12 +21,13 @@ class ValidateServiceImplTest {
             "2055550125",
             "202 555 0125",
             "(202) 555-0125",
-            "+111 (202) 555-0125",
+            "111 (202) 555-0125",
             "636 856 789",
-            "+111 636 856 789",
+            "111 636 856 789",
+            "375 447 357 152",
             "636 85 67 89",
-            "+111 636 85 67 89"})
-    void isValidPhoneNumber(String phone) {
+            "111 636 85 67 89"})
+    void should_validate_all_numbers(String phone) {
         assertTrue(validateService.isValidPhoneNumber(phone));
     }
 
@@ -41,7 +42,7 @@ class ValidateServiceImplTest {
             "+111 636 856 789!",
             "636 85 67 89s",
             "+111 636 85 67 89 9"})
-    void isValidPhoneNumber2(String phone) {
+    void should_not_validate_all_numbers(String phone) {
         assertFalse(validateService.isValidPhoneNumber(phone));
     }
 
