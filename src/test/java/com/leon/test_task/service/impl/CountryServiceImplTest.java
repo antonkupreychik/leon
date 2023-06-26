@@ -1,5 +1,7 @@
 package com.leon.test_task.service.impl;
 
+import com.leon.test_task.config.AppConfig;
+import com.leon.test_task.exception.CountryCodeException;
 import com.leon.test_task.exception.ParseException;
 import com.leon.test_task.properties.Properties;
 import com.leon.test_task.repository.CountryCodeRepository;
@@ -29,6 +31,8 @@ class CountryServiceImplTest {
     @Mock
     Properties properties;
     @Mock
+    AppConfig appConfig;
+    @Mock
     CountryCodeRepository countryCodeRepository;
     @Mock
     ParserService parserService;
@@ -39,21 +43,21 @@ class CountryServiceImplTest {
     @InjectMocks
     CountryServiceImpl countryServiceImpl;
 
-    String PATH_TO_CORRECT_HTML = "src/test/resources/correct-data.html";
-    String PATH_TO_INCORRECT_HTML = "src/test/resources/incorrect-data.html";
+    String PATH_TO_CORRECT_HTML = "src/test/resources/html/correct-data.html";
+    String PATH_TO_INCORRECT_HTML = "src/test/resources/html/incorrect-data.html";
     String UTF_8 = "UTF-8";
     String PATH = "/html/body/table/tbody";
     String INVALID_PHONE_NUMBER = "Invalid phone number";
     String VALID_PHONE_NUMBER = "1 202-456-1111";
     String VALID_COUNTRY = "USA";
-    String UNKNOWN = "UNKNOWN";
+    String UNKNOWN = "Unknown country";
 
     @Test
     void should_init_with_correct_data() throws IOException {
         File file = new File(PATH_TO_CORRECT_HTML);
         Document document = Jsoup.parse(file, UTF_8);
         Elements elements = document.selectXpath(PATH);
-
+        when(appConfig.isTest()).thenReturn(false);
         when(properties.getLink()).thenReturn("some link");
         when(properties.getXPatForTable()).thenReturn("some xpath");
         when(parserService.getElementsFromUrl(properties.getLink(), properties.getXPatForTable()))
@@ -68,6 +72,7 @@ class CountryServiceImplTest {
         Document document = Jsoup.parse(file, UTF_8);
         Elements elements = document.selectXpath(PATH);
 
+        when(appConfig.isTest()).thenReturn(false);
         when(properties.getLink()).thenReturn("some link");
         when(properties.getXPatForTable()).thenReturn("some xpath");
         when(parserService.getElementsFromUrl(properties.getLink(), properties.getXPatForTable()))
@@ -79,18 +84,18 @@ class CountryServiceImplTest {
     @Test
     void should_return_unknown_because_validation_failed() {
         when(validateService.isValidPhoneNumber(INVALID_PHONE_NUMBER)).thenReturn(false);
-        assertEquals("Validation error", countryServiceImpl.getCountryFromPhone(INVALID_PHONE_NUMBER));
+        assertThrows(CountryCodeException.class, () -> countryServiceImpl.getCountryFromPhone(INVALID_PHONE_NUMBER));
     }
 
     @Test
     void should_return_unknown_because_cache_is_empty() {
         when(validateService.isValidPhoneNumber(VALID_PHONE_NUMBER)).thenReturn(true);
         when(cacheService.get(anyString())).thenReturn(UNKNOWN);
-        assertEquals(UNKNOWN, countryServiceImpl.getCountryFromPhone(VALID_PHONE_NUMBER));
+        assertThrows(CountryCodeException.class, () -> countryServiceImpl.getCountryFromPhone(VALID_PHONE_NUMBER));
     }
 
     @Test
-    void should_return_country() {
+    void should_return_country() throws CountryCodeException {
         when(validateService.isValidPhoneNumber(VALID_PHONE_NUMBER)).thenReturn(true);
         when(cacheService.get("1")).thenReturn(VALID_COUNTRY);
         assertEquals(VALID_COUNTRY, countryServiceImpl.getCountryFromPhone(VALID_PHONE_NUMBER));

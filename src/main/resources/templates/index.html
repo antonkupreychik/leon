@@ -23,12 +23,16 @@
 <script>
     function getCountry() {
         let phone = document.getElementById("phone").value;
-        console.log(phone)
         fetch('/country?phone=' + phone)
             .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                alert(data.country)
+            .then(res => {
+                if (!res.ok) {
+                    console.error('Error:', res)
+                    alert(res.message)
+                } else {
+                    console.log('Data:', res);
+                    alert(res.country)
+                }
             })
     }
 </script>

@@ -1,6 +1,9 @@
 package com.leon.test_task.service.impl;
 
+import com.leon.test_task.config.AppConfig;
+import com.leon.test_task.exception.CountryCodeException;
 import com.leon.test_task.exception.ParseException;
+import com.leon.test_task.exception.enums.ExceptionType;
 import com.leon.test_task.model.CountryCode;
 import com.leon.test_task.properties.Properties;
 import com.leon.test_task.repository.CountryCodeRepository;
@@ -14,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,16 +42,22 @@ public class CountryServiceImpl implements CountryService {
     private final ParserService parserService;
     private final CacheService cacheService;
     private final ValidateService validateService;
+    private final AppConfig appConfig;
 
     /**
      * Gets country code from row and builds {@link CountryCode} object
      */
     @PostConstruct
+    @Profile("!test")
     public void init() {
-        log.info("Scanning properties: {}", properties);
-        Elements textFromProperties = parserService.getElementsFromUrl(properties.getLink(), properties.getXPatForTable());
-        saveCountryCodes(textFromProperties);
-        log.info("Country codes saved to DB and ready to use");
+        if (!appConfig.isTest()) {
+            log.info("Scanning properties: {}", properties);
+            Elements textFromProperties = parserService.getElementsFromUrl(properties.getLink(), properties.getXPatForTable());
+            saveCountryCodes(textFromProperties);
+            log.info("Country codes saved to DB and ready to use");
+        } else {
+            log.info("Test mode is on. Skipping init");
+        }
     }
 
     /**
@@ -57,7 +67,7 @@ public class CountryServiceImpl implements CountryService {
      * @return country name
      */
     @Override
-    public String getCountryFromPhone(String phone) {
+    public String getCountryFromPhone(String phone) throws CountryCodeException {
         if (validateService.isValidPhoneNumber(phone)) {
             String country;
             phone = removeNonDigits(phone);
@@ -70,10 +80,10 @@ public class CountryServiceImpl implements CountryService {
                 }
             }
             log.warn("Country not found for phone: {}", phone);
-            return UNKNOWN;
+            throw new CountryCodeException(ExceptionType.NOT_FOUND_EXCEPTION, "Country not found");
         } else {
             log.warn("Phone number is not valid: {}", phone);
-            return "Validation error";
+            throw new CountryCodeException(ExceptionType.VALIDATION_EXCEPTION, "Phone number is not valid");
         }
     }
 
@@ -109,7 +119,7 @@ public class CountryServiceImpl implements CountryService {
     }
 
     /**
-     * Check if elements from table is not null
+     * Check if elements from table are not null
      *
      * @param elementsFromTable elements from table
      */

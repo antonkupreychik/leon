@@ -44,7 +44,7 @@ class CacheServiceImplTest {
     void should_not_find_in_cache_and_scan_in_db() {
         when(countryCodeRepository.findByCode(incorrectCountryCode))
                 .thenReturn(Optional.empty());
-        assertEquals("UNKNOWN", cacheService.get(incorrectCountryCode));
+        assertEquals("Unknown country", cacheService.get(incorrectCountryCode));
     }
 
     @Test
