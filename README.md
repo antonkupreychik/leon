@@ -3,9 +3,9 @@
 ## How to run application
 
 1. Clone repository, go to root directory
-2. Run `docker-compose up` in root directory
+2. Run `sh run.sh` in root directory
 
-`docker-compose up` will build the application and run it in a docker container.
+`sh run.sh` will build the application and run it in a docker container.
 
 3. Open http://localhost:8008/ in browser
 4. Enter the phone number and click "Submit" button

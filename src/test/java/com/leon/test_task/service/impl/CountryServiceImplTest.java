@@ -48,7 +48,7 @@ class CountryServiceImplTest {
     String UTF_8 = "UTF-8";
     String PATH = "/html/body/table/tbody";
     String INVALID_PHONE_NUMBER = "Invalid phone number";
-    String VALID_PHONE_NUMBER = "1 202-456-1111";
+    String VALID_PHONE_NUMBER = "12024561111";
     String VALID_COUNTRY = "USA";
     String UNKNOWN = "Unknown country";
 
@@ -83,13 +83,13 @@ class CountryServiceImplTest {
 
     @Test
     void should_return_unknown_because_validation_failed() {
-        when(validateService.isValidPhoneNumber(INVALID_PHONE_NUMBER)).thenReturn(false);
+        when(validateService.isValidPhoneNumber(anyString())).thenReturn(false);
         assertThrows(CountryCodeException.class, () -> countryServiceImpl.getCountryFromPhone(INVALID_PHONE_NUMBER));
     }
 
     @Test
     void should_return_unknown_because_cache_is_empty() {
-        when(validateService.isValidPhoneNumber(VALID_PHONE_NUMBER)).thenReturn(true);
+        when(validateService.isValidPhoneNumber(anyString())).thenReturn(true);
         when(cacheService.get(anyString())).thenReturn(UNKNOWN);
         assertThrows(CountryCodeException.class, () -> countryServiceImpl.getCountryFromPhone(VALID_PHONE_NUMBER));
     }
