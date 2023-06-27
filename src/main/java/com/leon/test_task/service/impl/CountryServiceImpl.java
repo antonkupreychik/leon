@@ -68,9 +68,9 @@ public class CountryServiceImpl implements CountryService {
      */
     @Override
     public String getCountryFromPhone(String phone) throws CountryCodeException {
+        phone = removeNonDigits(phone);
         if (validateService.isValidPhoneNumber(phone)) {
             String country;
-            phone = removeNonDigits(phone);
             for (int i = 1; i < phone.length() + 1; i++) {
                 String countryCodeCandidate = phone.substring(0, i);
                 country = cacheService.get(countryCodeCandidate);
@@ -152,14 +152,6 @@ public class CountryServiceImpl implements CountryService {
     private CountryCode buildCountryCode(List<Node> columns) {
         String codes = columns.get(1).childNodes().get(1).childNode(0).toString();
         StringBuilder defaultCode = new StringBuilder(codes.split(SPACE)[0]);
-        if (codes.contains(LEFT_PARENTHESIS)) {
-            String[] additionalCodes = codes
-                    .substring(codes.indexOf(LEFT_PARENTHESIS) + 1, codes.indexOf(RIGHT_PARENTHESIS))
-                    .split(COMMA);
-            for (String additionalCode : additionalCodes) {
-                defaultCode.append(COMMA).append(additionalCode.trim());
-            }
-        }
         return CountryCode.builder()
                 .country((isHaveFlag(columns) ? columns.get(0).childNodes().get(1) : columns.get(0).childNodes().get(0)).toString())
                 .code(defaultCode.toString())

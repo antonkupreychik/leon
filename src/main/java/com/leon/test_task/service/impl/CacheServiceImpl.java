@@ -50,7 +50,15 @@ public class CacheServiceImpl implements CacheService {
      */
     @Override
     public void put(String key, String value) {
-        countryCodesCache.put(key, value);
+        String[] codes = key.split(",");
+        for (String code : codes) {
+            if (countryCodesCache.getIfPresent(code) == null) {
+                countryCodesCache.put(code, value);
+            } else {
+                String currentValue = countryCodesCache.getIfPresent(code);
+                countryCodesCache.put(code, currentValue + "," + value);
+            }
+        }
     }
 
     /**

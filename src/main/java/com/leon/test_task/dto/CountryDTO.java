@@ -4,9 +4,9 @@ import lombok.Data;
 
 @Data
 public class CountryDTO {
-    private String country;
+    private String message;
 
-    public CountryDTO(String country) {
-        this.country = country;
+    public CountryDTO(String message) {
+        this.message = message;
     }
 }
