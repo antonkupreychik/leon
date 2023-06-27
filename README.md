@@ -7,7 +7,7 @@
 
 `sh run.sh` will build the application and run it in a docker container.
 
-3. Open http://localhost:8008/ in browser
+3. Open http://localhost:8088/ in browser
 4. Enter the phone number and click "Submit" button
 
 ![img.png](images/index.png)
